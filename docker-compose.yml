@@ -110,6 +110,31 @@ services:
     depends_on:
       - db
 
+  # ---------------- LOGGING SERVICES (NGÀY 3) ----------------
+  loki:
+    image: grafana/loki:latest
+    container_name: task_loki
+    restart: always
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - backend_net
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: task_promtail
+    restart: always
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - backend_net
+    depends_on:
+      - loki
+
 networks:
   frontend_net:
     driver: bridge
